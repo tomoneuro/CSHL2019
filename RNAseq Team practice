@@ -107,6 +107,45 @@ multiqc .
 
 nano ~/.bashrc
 
+
+#Sam to Bam
+
+samtools sort -@ 8 -o KO_Rep1.bam KO_Rep1.sam
+samtools sort -@ 8 -o KO_Rep2.bam KO_Rep2.sam
+samtools sort -@ 8 -o KO_Rep3.bam KO_Rep3.sam
+samtools sort -@ 8 -o RE_Rep1.bam RE_Rep1.sam
+samtools sort -@ 8 -o RE_Rep2.bam RE_Rep2.sam
+samtools sort -@ 8 -o RE_Rep3.bam RE_Rep3.sam
+
+## merge bam files
+
+java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=KO.bam INPUT=KO_Rep1.bam INPUT=KO_Rep2.bam INPUT=KO_Rep3.bam
+java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=RE.bam INPUT=RE_Rep1.bam INPUT=RE_Rep2.bam INPUT=RE_Rep3.bam
+
+
+## Query name sort bam files
+# Runtime: ~ 4min
+java -Xmx60g -jar $PICARD SortSam I=KO.bam O=KO_namesorted.bam SO=queryname
+java -Xmx60g -jar $PICARD SortSam I=Exome_Tumor.bam O=Exome_Tumor_namesorted.bam SO=queryname
+
+
+## Mark duplicates
+java -Xmx60g -jar $PICARD MarkDuplicates I=KO_namesorted.bam O=KO_namesorted_mrkdup.bam ASSUME_SORT_ORDER=queryname METRICS_FILE=KO_mrkdup_metrics.txt QUIET=true COMPRESSION_LEVEL=0 VALIDATION_STRINGENCY=LENIENT
+java -Xmx60g -jar $PICARD MarkDuplicates I=RE_namesorted.bam O=RE_namesorted_mrkdup.bam ASSUME_SORT_ORDER=queryname METRICS_FILE=RE_mrkdup_metrics.txt QUIET=true COMPRESSION_LEVEL=0 VALIDATION_STRINGENCY=LENIENT
+
+
+java -Xmx60g -jar $PICARD MarkDuplicates I=KO_namesorted.bam O=KO_namesorted_mrkdup.bam ASSUME_SORT_ORDER=queryname METRICS_FILE=KO_mrkdup_metrics.txt QUIET=true COMPRESSION_LEVEL=0 VALIDATION_STRINGENCY=LENIENT
+java -Xmx60g -jar $PICARD MarkDuplicates I=RE_namesorted.bam O=RE_namesorted_mrkdup.bam ASSUME_SORT_ORDER=queryname METRICS_FILE=RE_mrkdup_metrics.txt QUIET=true COMPRESSION_LEVEL=0 VALIDATION_STRINGENCY=LENIENT
+
+## Position sort bam file
+java -Xmx60g -jar $PICARD SortSam I=KO_namesorted_mrkdup.bam O=KO_sorted_mrkdup.bam SO=coordinate
+java -Xmx60g -jar $PICARD SortSam I=RE_namesorted_mrkdup.bam O=RE_sorted_mrkdup.bam SO=coordinate
+
+## Create bam index for use with GATK, IGV, etc
+
+java -Xmx60g -jar $PICARD BuildBamIndex I=KO_sorted_mrkdup.bam
+java -Xmx60g -jar $PICARD BuildBamIndex I=RE_sorted_mrkdup.bam
+
 export RNA_HOME=~/workspace/rnaseq
 export RNA_DATA_DIR=$RNA_HOME/data
 export RNA_DATA_TRIM_DIR=$RNA_DATA_DIR/trimmed
