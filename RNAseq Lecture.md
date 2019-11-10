@@ -430,6 +430,175 @@ Save all genes with P<0.05 to a new file.
 grep -v feature UHR_vs_HBR_gene_results_sig.tsv | cut -f 6 | sed 's/\"//g' > DE_genes.txt
 head DE_genes.txt
 ```
+## ERCC DE Analysis
+Compare the observed versus expected differential expression estimates for the ERCC spike-in RNAs:
+```
+cd $RNA_HOME/de/ballgown/ref_only
+wget https://raw.githubusercontent.com/griffithlab/rnabio.org/master/assets/scripts/Tutorial_ERCC_DE.R
+chmod +x Tutorial_ERCC_DE.R
+./Tutorial_ERCC_DE.R $RNA_HOME/expression/htseq_counts/ERCC_Controls_Analysis.txt $RNA_HOME/de/ballgown/ref_only/UHR_vs_HBR_gene_results.tsv
+```
+results as pdf file
+
+
+# edgeR Analysis
+Make use of the raw counts you generated above using htseq-count
+edgeR is a bioconductor package designed specifically for differential expression of count-based RNA-seq data
+This is an alternative to using stringtie/ballgown to find differentially expressed genes
+```
+cd $RNA_HOME/
+mkdir -p de/htseq_counts
+cd de/htseq_counts
+```
+This next step creates a mapping file that will help us translate from ENSG IDs to Symbols. It does this by parsing the GTF transcriptome file we got from Ensembl.  That file contains both gene names and IDs. 
+```
+perl -ne 'if ($_ =~ /gene_id\s\"(ENSG\S+)\"\;/) { $id = $1; $name = undef; if ($_ =~ /gene_name\s\"(\S+)"\;/) { $name = $1; }; }; if ($id && $name) {print "$id\t$name\n";} if ($_=~/gene_id\s\"(ERCC\S+)\"/){print "$1\t$1\n";}' $RNA_REF_GTF | sort | uniq > ENSG_ID2Name.txt
+head ENSG_ID2Name.txt
+```
+Determine the number of unique Ensembl Gene IDs and symbols. 
+```
+#count unique gene ids
+cut -f 1 ENSG_ID2Name.txt | sort | uniq | wc -l
+
+#count unique gene names
+cut -f 2 ENSG_ID2Name.txt | sort | uniq | wc -l
+
+#show the most repeated gene names
+cut -f 2 ENSG_ID2Name.txt | sort | uniq -c | sort -r | head
+```
+Launch R:
+```
+R
+
+```
+
+###R code###
+#Set working directory where output will go
+```
+working_dir = "~/workspace/rnaseq/de/htseq_counts"
+setwd(working_dir)
+```
+
+#Read in gene mapping
+```
+mapping=read.table("~/workspace/rnaseq/de/htseq_counts/ENSG_ID2Name.txt", header=FALSE, stringsAsFactors=FALSE, row.names=1)
+```
+
+# Read in count matrix
+```
+rawdata=read.table("~/workspace/rnaseq/expression/htseq_counts/gene_read_counts_table_all_final.tsv", header=TRUE, stringsAsFactors=FALSE, row.names=1)
+```
+
+# Check dimensions
+```
+dim(rawdata)
+```
+
+# Require at least 25% of samples to have count > 25
+```
+quant <- apply(rawdata,1,quantile,0.75)
+keep <- which((quant >= 25) == 1)
+rawdata <- rawdata[keep,]
+dim(rawdata)
+```
+
+
+#################
+# Running edgeR #
+#################
+
+# load edgeR
+```
+library('edgeR')
+```
+
+# make class labels rep will repeat the labet at designated times
+```
+class <- factor( c( rep("UHR",3), rep("HBR",3) ))
+```
+
+# Get common gene names
+```
+genes=rownames(rawdata)
+gene_names=mapping[genes,1]
+```
+
+# Make DGEList object
+```
+y <- DGEList(counts=rawdata, genes=genes, group=class)
+nrow(y)
+```
+# TMM Normalization
+```
+y <- calcNormFactors(y)
+```
+
+# Estimate dispersion
+```
+y <- estimateCommonDisp(y, verbose=TRUE)
+y <- estimateTagwiseDisp(y)
+```
+# Differential expression test
+```
+et <- exactTest(y)
+```
+
+# Print top genes
+```
+topTags(et)
+```
+
+# Print number of up/down significant genes at FDR = 0.05  significance level
+```
+summary(de <- decideTestsDGE(et, p=.05))
+detags <- rownames(y)[as.logical(de)]
+```
+
+# Output DE genes
+# Matrix of significantly DE genes
+```
+mat <- cbind(
+ genes,gene_names,
+ sprintf('%0.3f',log10(et$table$PValue)),
+ sprintf('%0.3f',et$table$logFC)
+)[as.logical(de),]
+colnames(mat) <- c("Gene", "Gene_Name", "Log10_Pvalue", "Log_fold_change")
+```
+
+# Order by log fold change
+```
+o <- order(et$table$logFC[as.logical(de)],decreasing=TRUE)
+mat <- mat[o,]
+```
+# Save table
+```
+write.table(mat, file="DE_genes.txt", quote=FALSE, row.names=FALSE, sep="\t")
+```
+
+#To exit R type the following
+```
+quit(save="no")
+```
+
+Once we have run the edgeR tutorial, compare the sigDE genes to those saved earlier from cuffdiff:
+This next step creates a mapping file that will help us translate from ENSG IDs to Symbols. 
+
+```
+cat $RNA_HOME/de/ballgown/ref_only/DE_genes.txt
+cat $RNA_HOME/de/htseq_counts/DE_genes.txt
+```
+
+Pull out the gene IDs
+```
+cd $RNA_HOME/de/
+
+cut -f 1 $RNA_HOME/de/ballgown/ref_only/DE_genes.txt | sort  > ballgown_DE_gene_symbols.txt
+cut -f 2 $RNA_HOME/de/htseq_counts/DE_genes.txt | sort > htseq_counts_edgeR_DE_gene_symbols.txt
+```
+
+## Visualize overlap with a venn diagram
+http://www.cmbi.ru.nl/cdd/biovenn/
+http://bioinfogp.cnb.csic.es/tools/venny/
 
 
 
@@ -444,3 +613,10 @@ export RNA_REF_FASTA=$RNA_REF_INDEX.fa
 export RNA_REF_GTF=$RNA_REF_INDEX.gtf
 export RNA_ALIGN_DIR=$RNA_HOME/alignments/hisat2
 export _JAVA_OPTIONS=-Djavax.accessibility.assistive_technologies=
+
+To get the two gene lists you could use cat to print out each list in your terminal and then copy/paste.
+
+```
+cat ballgown_DE_gene_symbols.txt
+cat htseq_counts_edgeR_DE_gene_symbols.txt
+```
