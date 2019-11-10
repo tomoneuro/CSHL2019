@@ -393,6 +393,40 @@ write.table(sig_genes, "UHR_vs_HBR_gene_results_sig.tsv", sep="\t", quote=FALSE,
 quit(save="no")
 ```
 
+## Back to bash
+## What does the raw output from Ballgown look like?
+```
+head UHR_vs_HBR_gene_results.tsv
+```
+
+How many genes are there on this chromosome?
+```
+grep -v feature UHR_vs_HBR_gene_results.tsv | wc -l
+```
+How many passed filter in UHR or HBR?
+```
+grep -v feature UHR_vs_HBR_gene_results_filtered.tsv | wc -l
+```
+How many differentially expressed genes were found on this chromosome (p-value < 0.05)?
+```
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | wc -l
+```
+
+## Display the top 20 DE genes
+In the following commands we use grep -v feature to remove lines that contain “feature”. Then we use sort to sort the data in various ways. The k option specifies that we want to sort on a particular column (3 in this case which has the DE fold change values). The n option tells sort to sort numerically. The r option tells sort to reverse the sort
+
+```
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | sort -rnk 3 | head -n 20 | column -t #Higher abundance in UHR
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | sort -nk 3 | head -n 20 | column -t #Higher abundance in HBR
+```
+
+Save all genes with P<0.05 to a new file.
+```
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | cut -f 6 | sed 's/\"//g' > DE_genes.txt
+head DE_genes.txt
+```
+
+
 
 nano ./bashrc
 
