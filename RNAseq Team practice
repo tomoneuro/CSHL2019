@@ -2,18 +2,18 @@
 
 ## Create the necessary working directory
 
-``
+```
 cd $RNA_HOME
 mkdir -p ~/workspace/rnaseq/team_exercise/data
 cd ~/workspace/rnaseq/team_exercise/data
-``
+```
 
 ## Getting RNA data
-``
+```
 mkdir -p ~/workspace/rnaseq/team_exercise/references
 wget -c http://genomedata.org/seq-tec-workshop/read_data/rna_alignment-de_exercise/dataset_B/dataset.tar.gz
 tar -xzvf dataset.tar.gz
-``
+```
 ## Getting adapter reference
 
 mkdir -p ~/workspace/rnaseq/team_exercise/references
