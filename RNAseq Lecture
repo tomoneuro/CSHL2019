@@ -114,8 +114,30 @@ cd $RNA_DATA_TRIM_DIR
 fastqc *.fastq.gz
 
 
+## Alignment
+
+## SAM to BAM Conversion Convert HISAT2 sam files to bam files and sort by aligned position
+
+samtools sort -@ 8 -o UHR_Rep1.bam UHR_Rep1.sam
+samtools sort -@ 8 -o UHR_Rep2.bam UHR_Rep2.sam
+samtools sort -@ 8 -o UHR_Rep3.bam UHR_Rep3.sam
+samtools sort -@ 8 -o HBR_Rep1.bam HBR_Rep1.sam
+samtools sort -@ 8 -o HBR_Rep2.bam HBR_Rep2.sam
+samtools sort -@ 8 -o HBR_Rep3.bam HBR_Rep3.sam
+
+## Merge HISAT2 BAM files
+
+cd $RNA_HOME/alignments/hisat2
+java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=UHR.bam INPUT=UHR_Rep1.bam INPUT=UHR_Rep2.bam INPUT=UHR_Rep3.bam
+java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=HBR.bam INPUT=HBR_Rep1.bam INPUT=HBR_Rep2.bam INPUT=HBR_Rep3.bam
+
+## Count the alignment (BAM) files to make sure all were created successfully (you should have 8 total)
+
+ls -l *.bam | wc -l
+ls -l *.bam
 
 
+## Review in IGV
 
 nano ./bashrc
 
