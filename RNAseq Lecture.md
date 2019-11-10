@@ -415,8 +415,13 @@ grep -v feature UHR_vs_HBR_gene_results_sig.tsv | wc -l
 ## Display the top 20 DE genes
 In the following commands we use grep -v feature to remove lines that contain “feature”. Then we use sort to sort the data in various ways. The k option specifies that we want to sort on a particular column (3 in this case which has the DE fold change values). The n option tells sort to sort numerically. The r option tells sort to reverse the sort
 
+#Higher abundance in UHR
 ```
 grep -v feature UHR_vs_HBR_gene_results_sig.tsv | sort -rnk 3 | head -n 20 | column -t #Higher abundance in UHR
+```
+
+#Higher abundance in HBR by dropping r (reversing order)
+```
 grep -v feature UHR_vs_HBR_gene_results_sig.tsv | sort -nk 3 | head -n 20 | column -t #Higher abundance in HBR
 ```
 
