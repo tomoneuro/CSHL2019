@@ -194,7 +194,10 @@ wget https://raw.githubusercontent.com/griffithlab/rnabio.org/master/assets/scri
 chmod +x stringtie_expression_matrix.pl
 ```
 
-## Create a tidy expression matrix files for the StringTie results. First TPM as expression measure
+## Create a tidy expression matrix files for the StringTie results. First TPM as expression measure. For this we use perl script so we can put everything at once
+
+./stringtie_expression_matrix.pl --expression_metric=TPM --result_dirs='<input bam files> ' --transcript_matrix_file=transcript_tpm_all_samples.tsv (transcript output file) --gene_matrix_file=gene_tpm_all_samples.tsv (gene output file)
+
 ```
 ./stringtie_expression_matrix.pl --expression_metric=TPM --result_dirs='HBR_Rep1,HBR_Rep2,HBR_Rep3,UHR_Rep1,UHR_Rep2,UHR_Rep3' --transcript_matrix_file=transcript_tpm_all_samples.tsv --gene_matrix_file=gene_tpm_all_samples.tsv
 ```
@@ -210,7 +213,10 @@ chmod +x stringtie_expression_matrix.pl
 ## Visualizing transcript in tpm
 ```
 column -t transcript_tpm_all_samples.tsv | less -S
+```
 
+## Visualizing gene in tpm
+```
 column -t gene_tpm_all_samples.tsv | less -S
 ```
 
