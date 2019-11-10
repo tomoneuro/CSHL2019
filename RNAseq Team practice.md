@@ -15,53 +15,53 @@ wget -c http://genomedata.org/seq-tec-workshop/read_data/rna_alignment-de_exerci
 tar -xzvf dataset.tar.gz
 ```
 ## Getting adapter reference
-
+```
 mkdir -p ~/workspace/rnaseq/team_exercise/references
 cd ~/workspace/rnaseq/team_exercise/references
-
+```
 
 ## Getting reference for Adapter trimming
-
+```
 wget -c http://genomedata.org/seq-tec-workshop/references/RNA/illumina_multiplex.fa
-
+```
 
 ## Reference fasta corresponding to your team's assigned chromosome (e.g. chr12)
-
+```
 wget -c http://genomedata.org/seq-tec-workshop/references/RNA/chr12.fa
-
+```
 
 ## Obtain annotated reference gtf file corresponding to your team's assigned chromosome (e.g. chr6)
-
+```
 wget -c http://genomedata.org/seq-tec-workshop/references/RNA/chr6_Homo_sapiens.GRCh38.95.gtf
-
+```
 
 ## Indexting
-
+```
 cd /home/ubuntu/workspace/rnaseq/refs
 
 hisat2_extract_splice_sites.py chr12_Homo_sapiens.GRCh38.95.gtf > splicesites.tsv
 hisat2_extract_exons.py chr12_Homo_sapiens.GRCh38.95.gtf > exons.tsv
 hisat2-build -p 8 --ss splicesites.tsv --exon exons.tsv chr12.fa ~/workspace/rnaseq/team_exercise/references/chr12_index
-
+```
 
 ## Prealignment QC
-
+```
 cd $RNA_HOME/data
 
 fastqc *.fastq.gz
-
+```
 ## review your fastqc data, then multiqc
-
+```
 multiqc .
-
+```
 ## Trimming ~/workspace/rnaseq/team_exercise/data/trimmed/
-
+```
 echo $RNA_DATA_TRIM_DIR
 
 mkdir -p $RNA_DATA_TRIM_DIR
-
+```
 ## Download illumina adapter sequence file
-
+```
 echo $RNA_REFS_DIR
 mkdir -p $RNA_REFS_DIR
 cd $RNA_REFS_DIR
@@ -78,10 +78,10 @@ flexbar --adapter-min-overlap 7 --adapter-trim-end RIGHT --adapters ~/workspace/
 flexbar --adapter-min-overlap 7 --adapter-trim-end RIGHT --adapters ~/workspace/rnaseq/team_exercise/references/illumina_multiplex.fa --pre-trim-left 13 --max-uncalled 300 --min-read-length 25 --threads 8 --zip-output GZ --reads SRR10045020_1.fastq.gz  --reads2 SRR10045020_2.fastq.gz --target ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045020_1
 
 flexbar --adapter-min-overlap 7 --adapter-trim-end RIGHT --adapters ~/workspace/rnaseq/team_exercise/references/illumina_multiplex.fa --pre-trim-left 13 --max-uncalled 300 --min-read-length 25 --threads 8 --zip-output GZ --reads SRR10045021_1.fastq.gz  --reads2 SRR10045021_2.fastq.gz --target ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045021_1
-
+```
 
 ## Post trimming QC
-
+```
 fastqc *.fastq.gz
 
 echo $RNA_ALIGN_DIR
@@ -100,35 +100,36 @@ hisat2 -p 8 --rg-id=RE_Rep1 --rg SM:RE --rg LB:RE_Rep1 --rg PL:ILLUMINA --rg PU:
 hisat2 -p 8 --rg-id=RE_Rep2 --rg SM:KO --rg LB:RE_Rep2 --rg PL:ILLUMINA --rg PU:SRR10045017 -x ~/workspace/rnaseq/team_exercise/references/chr12_index --dta --rna-strandness RF -1 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045020_1_1.fastq.gz -2 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045020_1_2.fastq.gz -S ./RE_Rep2.sam
 
 hisat2 -p 8 --rg-id=RE_Rep3 --rg SM:RE --rg LB:RE_Rep3 --rg PL:ILLUMINA --rg PU:SRR10045018 -x ~/workspace/rnaseq/team_exercise/references/chr12_index --dta --rna-strandness RF -1 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045021_1_1.fastq.gz -2 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045021_1_2.fastq.gz -S ./RE_Rep3.sam
-
+```
 ## Post alignment QC
-
+```
 fastqc *.sam
 
 multiqc .
-
+```
 ## path information
-
+```
 nano ~/.bashrc
-
+```
 
 #Sam to Bam
-
+```
 samtools sort -@ 8 -o KO_Rep1.bam KO_Rep1.sam
 samtools sort -@ 8 -o KO_Rep2.bam KO_Rep2.sam
 samtools sort -@ 8 -o KO_Rep3.bam KO_Rep3.sam
 samtools sort -@ 8 -o RE_Rep1.bam RE_Rep1.sam
 samtools sort -@ 8 -o RE_Rep2.bam RE_Rep2.sam
 samtools sort -@ 8 -o RE_Rep3.bam RE_Rep3.sam
-
+```
 ## merge bam files
-
+```
 java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=KO.bam INPUT=KO_Rep1.bam INPUT=KO_Rep2.bam INPUT=KO_Rep3.bam
 java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=RE.bam INPUT=RE_Rep1.bam INPUT=RE_Rep2.bam INPUT=RE_Rep3.bam
-
+```
 ## Indexing bam files
+```
 find *.bam -exec echo samtools index {} \; | sh
-
+```
 
 
 
