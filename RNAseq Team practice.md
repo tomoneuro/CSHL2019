@@ -35,7 +35,7 @@ wget -c http://genomedata.org/seq-tec-workshop/references/RNA/chr12.fa
 wget -c http://genomedata.org/seq-tec-workshop/references/RNA/chr6_Homo_sapiens.GRCh38.95.gtf
 ```
 
-## Indexting
+## Indexing references
 ```
 cd /home/ubuntu/workspace/rnaseq/refs
 
@@ -112,7 +112,7 @@ multiqc .
 nano ~/.bashrc
 ```
 
-#Sam to Bam
+## Sam to Bam
 ```
 samtools sort -@ 8 -o KO_Rep1.bam KO_Rep1.sam
 samtools sort -@ 8 -o KO_Rep2.bam KO_Rep2.sam
@@ -121,7 +121,7 @@ samtools sort -@ 8 -o RE_Rep1.bam RE_Rep1.sam
 samtools sort -@ 8 -o RE_Rep2.bam RE_Rep2.sam
 samtools sort -@ 8 -o RE_Rep3.bam RE_Rep3.sam
 ```
-## merge bam files
+## Merge bam files
 ```
 java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=KO.bam INPUT=KO_Rep1.bam INPUT=KO_Rep2.bam INPUT=KO_Rep3.bam
 java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=RE.bam INPUT=RE_Rep1.bam INPUT=RE_Rep2.bam INPUT=RE_Rep3.bam
@@ -130,6 +130,11 @@ java -Xmx2g -jar $RNA_HOME/student_tools/picard.jar MergeSamFiles OUTPUT=RE.bam 
 ```
 find *.bam -exec echo samtools index {} \; | sh
 ```
+
+## Visalizing alignment and expression in IGV
+
+## Use Stringtie to generate expression estimates from the SAM/BAM files 
+
 
 
 
