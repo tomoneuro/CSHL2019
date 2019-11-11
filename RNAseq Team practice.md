@@ -283,7 +283,7 @@ working_dir = "~/workspace/rnaseq/team_exercise/de/ballgown/ref_only"
 setwd(working_dir)
 ```
 
-# List the current contents of this directory
+#List the current contents of this directory
 ```
 dir()
 ```
@@ -292,27 +292,32 @@ dir()
 ```
 load('bg.rda')
 ```
-# View a summary of the ballgown object
+#View a summary of the ballgown object
+```
 bg
+```
 
-
-# Load gene names for lookup later in the tutorial
+#Load gene names for lookup later in the tutorial
+```
 bg_table = texpr(bg, 'all')
 bg_gene_names = unique(bg_table[, 9:10])
-
-# Pull the gene_expression data frame from the ballgown object
+```
+#Pull the gene_expression data frame from the ballgown object
+```
 gene_expression = as.data.frame(gexpr(bg))
-
-# Set the columns for finding FPKM and create shorter names for figures
+```
+#Set the columns for finding FPKM and create shorter names for figures
+```
 data_columns=c(1:6)
-
-# Calculate the differential expression results including significance
+```
+#Calculate the differential expression results including significance
+```
 results_genes = stattest(bg, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
 results_genes = merge(results_genes,bg_gene_names,by.x=c("id"),by.y=c("gene_id"))
-
 results_genes[,"de"] = log2(results_genes[,"fc"])
 ```
-#### Write a simple table of differentially expressed transcripts to an output file
+## Write a simple table of differentially expressed transcripts to an output file
+
 #Each should be significant with a log2 fold-change >= 2
 ```
 sigpi = which(results_genes[,"pval"]<0.05)
@@ -321,7 +326,8 @@ sigp = results_genes[sigpi,]
 sigde = which(abs(sigp[,"de"]) >= 2)
 sig_tn_de = sigp[sigde,]
 ```
-#### Plot #11 - Create a heatmap to vizualize expression differences between the eight samples
+## Create a heatmap to vizualize expression differences between the eight samples
+
 #Define custom dist and hclust functions for use with heatmaps
 ```
 mydist=function(c) {dist(c,method="euclidian")}
