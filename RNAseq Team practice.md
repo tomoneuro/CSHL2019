@@ -134,32 +134,186 @@ find *.bam -exec echo samtools index {} \; | sh
 ## Visalizing alignment and expression in IGV
 
 ## Use Stringtie to generate expression estimates from the SAM/BAM files 
+```
+stringtie -p 8 -G ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf -e -B -o KO_Rep1/transcripts.gtf -A KO_Rep1/gene_abundances.tsv ~/workspace/rnaseq/team_exercise/alignment/hisat/KO_Rep1.bam 
+stringtie -p 8 -G ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf -e -B -o KO_Rep2/transcripts.gtf -A KO_Rep2/gene_abundances.tsv ~/workspace/rnaseq/team_exercise/alignment/hisat/KO_Rep2.bam 
+stringtie -p 8 -G ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf -e -B -o KO_Rep3/transcripts.gtf -A KO_Rep3/gene_abundances.tsv ~/workspace/rnaseq/team_exercise/alignment/hisat/KO_Rep3.bam
 
 
+stringtie -p 8 -G ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf -e -B -o RE_Rep1/transcripts.gtf -A RE_Rep1/gene_abundances.tsv ~/workspace/rnaseq/team_exercise/alignment/hisat/RE_Rep1.bam
+stringtie -p 8 -G ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf -e -B -o RE_Rep2/transcripts.gtf -A RE_Rep2/gene_abundances.tsv ~/workspace/rnaseq/team_exercise/alignment/hisat/RE_Rep2.bam 
+stringtie -p 8 -G ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf -e -B -o RE_Rep3/transcripts.gtf -A RE_Rep3/gene_abundances.tsv ~/workspace/rnaseq/team_exercise/alignment/hisat/RE_Rep3.bam
+
+less -S KO_Rep1/transcripts.gtf
+
+grep -v "^#" KO_Rep1/transcripts.gtf | grep -w "transcript" | column -t | less -S
+
+awk '{if ($3=="transcript") print}' RE_Rep1/transcripts.gtf | cut -f 1,4,9 | less
+
+cd ~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/
+
+wget https://raw.githubusercontent.com/griffithlab/rnabio.org/master/assets/scripts/stringtie_expression_matrix.pl
+chmod +x stringtie_expression_matrix.pl
+
+## Create a tidy expression matrix files for the StringTie results. First TPM as expression measure. For this we use perl script so we can put everything at once
+
+./stringtie_expression_matrix.pl --expression_metric=TPM --result_dirs='KO_Rep1,KO_Rep2,KO_Rep3,RE_Rep1,RE_Rep2,RE_Rep3' --transcript_matrix_file=transcript_tpm_all_samples.tsv --gene_matrix_file=gene_tpm_all_samples.tsv
+
+./stringtie_expression_matrix.pl --expression_metric=FPKM --result_dirs='KO_Rep1,KO_Rep2,KO_Rep3,RE_Rep1,RE_Rep2,RE_Rep3' --transcript_matrix_file=transcript_fpkm_all_samples.tsv --gene_matrix_file=gene_fpkm_all_samples.tsv
+
+./stringtie_expression_matrix.pl --expression_metric=Coverage --result_dirs='KO_Rep1,KO_Rep2,KO_Rep3,RE_Rep1,RE_Rep2,RE_Rep3' --transcript_matrix_file=transcript_coverage_all_samples.tsv --gene_matrix_file=gene_coverage_all_samples.tsv
 
 
-###########DNA way####################
-## Query name sort bam files
-# Runtime: ~ 4min
-java -Xmx60g -jar $PICARD SortSam I=KO.bam O=KO_namesorted.bam SO=queryname
-java -Xmx60g -jar $PICARD SortSam I=RE.bam O=RE_namesorted.bam SO=queryname
+cd ~/workspace/rnaseq/team_exercise
+mkdir -p expression/htseq_counts
+cd expression/htseq_counts
 
 
-## Mark duplicates
-java -Xmx60g -jar $PICARD MarkDuplicates I=KO_namesorted.bam O=KO_namesorted_mrkdup.bam ASSUME_SORT_ORDER=queryname METRICS_FILE=KO_mrkdup_metrics.txt QUIET=true COMPRESSION_LEVEL=0 VALIDATION_STRINGENCY=LENIENT
-java -Xmx60g -jar $PICARD MarkDuplicates I=RE_namesorted.bam O=RE_namesorted_mrkdup.bam ASSUME_SORT_ORDER=queryname METRICS_FILE=RE_mrkdup_metrics.txt QUIET=true COMPRESSION_LEVEL=0 VALIDATION_STRINGENCY=LENIENT
+htseq-count --format bam --order pos --mode intersection-strict --stranded reverse --minaqual 1 --type exon --idattr gene_id ~/workspace/rnaseq/team_exercise/alignment/hisat/KO_Rep1.bam ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf > KO_Rep1_gene.tsv
+htseq-count --format bam --order pos --mode intersection-strict --stranded reverse --minaqual 1 --type exon --idattr gene_id ~/workspace/rnaseq/team_exercise/alignment/hisat/KO_Rep2.bam ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf > KO_Rep2_gene.tsv
+htseq-count --format bam --order pos --mode intersection-strict --stranded reverse --minaqual 1 --type exon --idattr gene_id ~/workspace/rnaseq/team_exercise/alignment/hisat/KO_Rep3.bam ~/workspace/rnaseq/team_exercise/references/chr12_Homo_sapiens.GRCh38.95.gtf > KO_Rep3_gene.tsv
 
 
+## Q1. Based on your stringtie results, what are the top 5 genes with highest average expression levels across all knockout samples? What about in your rescue samples? How large is the overlap between the two sets of genes? (Hint: You can use R for this analysis)
+Here’s some R code to start you off:
 
-## Position sort bam file
-java -Xmx60g -jar $PICARD SortSam I=KO_namesorted_mrkdup.bam O=KO_sorted_mrkdup.bam SO=coordinate
-java -Xmx60g -jar $PICARD SortSam I=RE_namesorted_mrkdup.bam O=RE_sorted_mrkdup.bam SO=coordinate
+exp_table=read.table('gene_tpm_all_samples.tsv', header=TRUE)
 
-## Create bam index for use with GATK, IGV, etc
 
-java -Xmx60g -jar $PICARD BuildBamIndex I=KO_sorted_mrkdup.bam
-java -Xmx60g -jar $PICARD BuildBamIndex I=RE_sorted_mrkdup.bam
-###########DNA way####################
+mkdir -p ~/workspace/rnaseq/team_exercise/de/ballgown/ref_only/
+cd ~/workspace/rnaseq/team_exercise/de/ballgown/ref_only/
+
+printf "\"ids\",\"type\",\"path\"\n\"KO_Rep1\",\"KO\",\"~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/KO_Rep1\"\n\"KO_Rep2\",\"KO\",\"~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/KO_Rep2\"\n\"KO_Rep3\",\"KO\",\"~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/KO_Rep3\"\n\"RE_Rep1\",\"RE\",\"~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/RE_Rep1\"\n\"RE_Rep2\",\"RE\",\"~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/RE_Rep2\"\n\"RE_Rep3\",\"RE\",\"~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/RE_Rep3\"\n" > KO_vs_RE.csv
+
+cat KO_vs_RE.csv
+"ids","type","path"
+"KO_Rep1","KO","~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/KO_Rep1"
+"KO_Rep2","KO","~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/KO_Rep2"
+"KO_Rep3","KO","~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/KO_Rep3"
+"RE_Rep1","RE","~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/RE_Rep1"
+"RE_Rep2","RE","~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/RE_Rep2"
+"RE_Rep3","RE","~/workspace/rnaseq/team_exercise/expression/stringtie/ref_only/RE_Rep3"
+
+
+R
+
+#####R######
+library(ballgown)
+library(genefilter)
+library(dplyr)
+library(devtools)
+
+> pheno_data = read.csv("KO_vs_RE.csv")
+> bg = ballgown(samples=as.vector(pheno_data$path), pData=pheno_data)
+
+> bg
+ballgown instance with 11734 transcripts and 6 samples
+> bg_table = texpr(bg, 'all')
+> bg_gene_names = unique(bg_table[, 9:10])
+> 
+> save(bg, file='bg.rda')
+
+results_transcripts = stattest(bg, feature="transcript", covariate="type", getFC=TRUE, meas="FPKM")
+> results_genes = stattest(bg, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
+> results_genes = merge(results_genes, bg_gene_names, by.x=c("id"), by.y=c("gene_id")
+
+write.table(results_transcripts, "KO_vs_RE_transcript_results.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+write.table(results_genes, "KO_vs_RE_gene_results.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+
+bg_filt = subset (bg,"rowVars(texpr(bg)) > 1", genomesubset=TRUE)
+
+bg_filt_table = texpr(bg_filt , 'all')
+bg_filt_gene_names = unique(bg_filt_table[, 9:10])
+
+results_transcripts = stattest(bg_filt, feature="transcript", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = stattest(bg_filt, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = merge(results_genes, bg_filt_gene_names, by.x=c("id"), by.y=c("gene_id"))
+
+write.table(results_transcripts, "KO_vs_RE_transcript_results_filtered.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+write.table(results_genes, "KO_vs_RE_gene_results_filtered.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+
+sig_transcripts = subset(results_transcripts, results_transcripts$pval<0.05)
+sig_genes = subset(results_genes, results_genes$pval<0.05)
+
+write.table(sig_transcripts, "KO_vs_RE_transcript_results_sig.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+write.table(sig_genes, "KO_vs_RE_gene_results_sig.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+
+grep -v feature KO_vs_RE_gene_results_sig.tsv | wc -l
+
+##Display the top 20 DE genes
+grep -v feature KO_vs_RE_gene_results_sig.tsv | sort -rnk 3 | head -n 20 | column -t #Higher abundance in KO
+grep -v feature KO_vs_RE_gene_results_sig.tsv | sort -nk 3 | head -n 20 | column -t #Higher abundance in RE
+
+
+R
+library(ggplot2)
+library(gplots)
+library(GenomicRanges)
+library(ballgown)
+
+#Set your output pdf name
+pdf(file="KOvsRE_DE.pdf")
+
+#Set working directory where results files exist
+working_dir = "~/workspace/rnaseq/team_exercise/de/ballgown/ref_only"
+setwd(working_dir)
+
+# List the current contents of this directory
+dir()
+
+
+#Loading object: Import expression and differential expression results from the HISAT2/StringTie/Ballgown pipeline 
+load('bg.rda')
+
+# View a summary of the ballgown object
+bg
+
+
+# Load gene names for lookup later in the tutorial
+bg_table = texpr(bg, 'all')
+bg_gene_names = unique(bg_table[, 9:10])
+
+# Pull the gene_expression data frame from the ballgown object
+gene_expression = as.data.frame(gexpr(bg))
+
+# Set the columns for finding FPKM and create shorter names for figures
+data_columns=c(1:6)
+
+# Calculate the differential expression results including significance
+results_genes = stattest(bg, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = merge(results_genes,bg_gene_names,by.x=c("id"),by.y=c("gene_id"))
+
+results_genes[,"de"] = log2(results_genes[,"fc"])
+
+#### Write a simple table of differentially expressed transcripts to an output file
+#Each should be significant with a log2 fold-change >= 2
+
+sigpi = which(results_genes[,"pval"]<0.05)
+sigp = results_genes[sigpi,]
+
+sigde = which(abs(sigp[,"de"]) >= 2)
+sig_tn_de = sigp[sigde,]
+
+#### Plot #11 - Create a heatmap to vizualize expression differences between the eight samples
+#Define custom dist and hclust functions for use with heatmaps
+
+mydist=function(c) {dist(c,method="euclidian")}
+myclust=function(c) {hclust(c,method="average")}
+
+main_title="sig DE Transcripts"
+par(cex.main=0.8)
+sig_genes_de=sig_tn_de[,"id"]
+sig_gene_names_de=sig_tn_de[,"gene_name"]
+
+data=log2(as.matrix(gene_expression[as.vector(sig_genes_de),data_columns])+1)
+heatmap.2(data, hclustfun=myclust, distfun=mydist, na.rm = TRUE, scale="none", dendrogram="both", margins=c(10,4), Rowv=TRUE, Colv=TRUE, symbreaks=FALSE, key=TRUE, symkey=FALSE, density.info="none", trace="none", main=main_title, cexRow=0.3, cexCol=1, labRow=sig_gene_names_de,col=rev(heat.colors(75)))
+
+
+dev.off()
+
+quit()
+
+
 
 
 export RNA_HOME=~/workspace/rnaseq
