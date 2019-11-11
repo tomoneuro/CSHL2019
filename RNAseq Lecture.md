@@ -600,6 +600,146 @@ cut -f 2 $RNA_HOME/de/htseq_counts/DE_genes.txt | sort > htseq_counts_edgeR_DE_g
 http://www.cmbi.ru.nl/cdd/biovenn/
 http://bioinfogp.cnb.csic.es/tools/venny/
 
+#To get the two gene lists you could use cat to print out each list in your terminal and then copy/paste.
+```
+cat ballgown_DE_gene_symbols.txt
+cat htseq_counts_edgeR_DE_gene_symbols.txt
+```
+
+cd $RNA_HOME/de/ballgown/ref_only
+R
+
+#####R######
+```
+library(ballgown)
+library(genefilter)
+library(dplyr)
+library(devtools)
+
+pheno_data = read.csv("UHR_vs_HBR.csv")
+bg = ballgown(samples=as.vector(pheno_data$path), pData=pheno_data)
+
+bg
+
+bg_table = texpr(bg, 'all')
+bg_gene_names = unique(bg_table[, 9:10])
+
+save(bg, file='bg.rda')
+
+results_transcripts = stattest(bg, feature="transcript", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = stattest(bg, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = merge(results_genes, bg_gene_names, by.x=c("id"), by.y=c("gene_id")
+
+write.table(results_transcripts, "UHR_vs_HBR_transcript_results.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+write.table(results_genes, "UHR_vs_HBR_gene_results.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+
+bg_filt = subset (bg,"rowVars(texpr(bg)) > 1", genomesubset=TRUE)
+
+bg_filt_table = texpr(bg_filt , 'all')
+bg_filt_gene_names = unique(bg_filt_table[, 9:10])
+
+results_transcripts = stattest(bg_filt, feature="transcript", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = stattest(bg_filt, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = merge(results_genes, bg_filt_gene_names, by.x=c("id"), by.y=c("gene_id"))
+
+write.table(results_transcripts, "KO_vs_RE_transcript_results_filtered.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+write.table(results_genes, "KO_vs_RE_gene_results_filtered.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+
+sig_transcripts = subset(results_transcripts, results_transcripts$pval<0.05)
+sig_genes = subset(results_genes, results_genes$pval<0.05)
+
+write.table(sig_transcripts, "UHR_vs_HBR_transcript_results_sig.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+write.table(sig_genes, "UHR_vs_HBR_gene_results_sig.tsv", sep="\t", quote=FALSE, row.names = FALSE)
+
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | wc -l
+```
+
+##Display the top 20 DE genes
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | sort -rnk 3 | head -n 20 | column -t #Higher abundance in KO
+grep -v feature UHR_vs_HBR_gene_results_sig.tsv | sort -nk 3 | head -n 20 | column -t #Higher abundance in RE
+
+# Construct a heatmap showcasing the significantly DE genes
+```
+R
+library(ggplot2)
+library(gplots)
+library(GenomicRanges)
+library(ballgown)
+```
+#Set your output pdf name
+```
+pdf(file="UHR_vs_HBR.pdf")
+```
+#Set working directory where results files exist
+```
+working_dir = "~workspace/rnaseq/de/ballgown/ref_only"
+setwd(working_dir)
+```
+
+#List the current contents of this directory
+```
+dir()
+```
+
+#Loading object: Import expression and differential expression results from the HISAT2/StringTie/Ballgown pipeline 
+```
+load('bg.rda')
+```
+#View a summary of the ballgown object
+```
+bg
+```
+
+#Load gene names for lookup later in the tutorial
+```
+bg_table = texpr(bg, 'all')
+bg_gene_names = unique(bg_table[, 9:10])
+```
+#Pull the gene_expression data frame from the ballgown object
+```
+gene_expression = as.data.frame(gexpr(bg))
+```
+#Set the columns for finding FPKM and create shorter names for figures
+```
+data_columns=c(1:6)
+```
+#Calculate the differential expression results including significance
+```
+results_genes = stattest(bg, feature="gene", covariate="type", getFC=TRUE, meas="FPKM")
+results_genes = merge(results_genes,bg_gene_names,by.x=c("id"),by.y=c("gene_id"))
+results_genes[,"de"] = log2(results_genes[,"fc"])
+```
+## Write a simple table of differentially expressed transcripts to an output file
+
+#Each should be significant with a log2 fold-change >= 2
+```
+sigpi = which(results_genes[,"pval"]<0.05)
+sigp = results_genes[sigpi,]
+
+sigde = which(abs(sigp[,"de"]) >= 2)
+sig_tn_de = sigp[sigde,]
+```
+## Create a heatmap to vizualize expression differences between the eight samples
+
+#Define custom dist and hclust functions for use with heatmaps
+```
+mydist=function(c) {dist(c,method="euclidian")}
+myclust=function(c) {hclust(c,method="average")}
+
+main_title="sig DE Transcripts"
+par(cex.main=0.8)
+sig_genes_de=sig_tn_de[,"id"]
+sig_gene_names_de=sig_tn_de[,"gene_name"]
+
+data=log2(as.matrix(gene_expression[as.vector(sig_genes_de),data_columns])+1)
+heatmap.2(data, hclustfun=myclust, distfun=mydist, na.rm = TRUE, scale="none", dendrogram="both", margins=c(10,4), Rowv=TRUE, Colv=TRUE, symbreaks=FALSE, key=TRUE, symkey=FALSE, density.info="none", trace="none", main=main_title, cexRow=0.3, cexCol=1, labRow=sig_gene_names_de,col=rev(heat.colors(75)))
+
+
+dev.off()
+
+quit()
+```
+
 
 
 nano ./bashrc
