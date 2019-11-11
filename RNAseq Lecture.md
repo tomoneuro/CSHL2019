@@ -6,7 +6,7 @@ cd $RNA_HOME
 echo $RNA_REFS_DIR
 mkdir -p $RNA_REFS_DIR
 ```
-## Getting data
+## Getting reference data (in this case, chromosome 22)
 ```
 cd $RNA_REFS_DIR
 wget http://genomedata.org/rnaseq-tutorial/fasta/GRCh38/chr22_with_ERCC92.fa
