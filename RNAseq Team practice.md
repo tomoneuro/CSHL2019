@@ -87,8 +87,9 @@ fastqc *.fastq.gz
 echo $RNA_ALIGN_DIR
 mkdir -p $RNA_ALIGN_DIR
 cd $RNA_ALIGN_DIR
-
-
+```
+# Alignment with HISAT2
+```
 hisat2 -p 8 --rg-id=KO_Rep1 --rg SM:KO --rg LB:KO_Rep1 --rg PL:ILLUMINA --rg PU:SRR10045016 -x ~/workspace/rnaseq/team_exercise/references/chr12_index --dta --rna-strandness RF -1 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045016_1_1.fastq.gz -2 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045016_1_2.fastq.gz -S ./KO_Rep1.sam
 
 hisat2 -p 8 --rg-id=KO_Rep2 --rg SM:KO --rg LB:KO_Rep2 --rg PL:ILLUMINA --rg PU:SRR10045017 -x ~/workspace/rnaseq/team_exercise/references/chr12_index --dta --rna-strandness RF -1 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045017_1_1.fastq.gz -2 ~/workspace/rnaseq/team_exercise/data/trimmed/SRR10045017_1_2.fastq.gz -S ./KO_Rep2.sam
