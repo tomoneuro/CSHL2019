@@ -349,6 +349,7 @@ quit()
 
 
 
+
 export RNA_HOME=~/workspace/rnaseq
 export RNA_DATA_DIR=$RNA_HOME/data
 export RNA_DATA_TRIM_DIR=$RNA_DATA_DIR/trimmed
