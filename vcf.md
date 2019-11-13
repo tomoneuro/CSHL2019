@@ -152,7 +152,11 @@ zless platinum-exome.vcf.gz | grep "^#=1" | wc -l
 
 
 10. What do you guess for the sex of the four individuals? How would you go about this?
+Using PEDDY software to determine based on Het/Hom+alt ratio (should be higher in female than male)
+http://home.chpc.utah.edu/~u1138933/peddy/platinum_run3/CSHL_AdvSeqTech_2019.html
 
 11. NA12878, NA12891, and NA12892 are a family. Who do you think are is the kid and who are the parents?
-
+Using PEDDY software to determine based on ISB2 number suggestive for portion of variants shared between two individuals (should be higher in parent-child relationship and lower in unrelated (parents or unrelated) individuals.
+http://home.chpc.utah.edu/~u1138933/peddy/platinum_run3/CSHL_AdvSeqTech_2019.html
 12. How would you go about finding de novo mutations in the kid?
+Using GEMINI
