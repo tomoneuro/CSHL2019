@@ -1,23 +1,27 @@
 # assumes you have SSH'ed and qlogin'ed
+```
 cd wed
 cd mydata
 
-# slide 17
-# curl https://s3.amazonaws.com/gemini-tutorials/trio.trim.vep.vcf.gz > trio.trim.vep.vcf.gz
-# curl https://s3.amazonaws.com/gemini-tutorials/denovo.ped > denovo.ped
-# gemini load --cores 2 \
-#             -v  trio.trim.vep.vcf.gz \
-#             -t VEP \
-#             --tempdir . \
-#             --skip-gene-tables --skip-cadd --skip-gerp-bp \
-#             -p denovo.ped \
-#        trio.trim.vep.denovo.db
+slide 17
+curl https://s3.amazonaws.com/gemini-tutorials/trio.trim.vep.vcf.gz > trio.trim.vep.vcf.gz
+curl https://s3.amazonaws.com/gemini-tutorials/denovo.ped > denovo.ped
+gemini load --cores 2 \
+            -v  trio.trim.vep.vcf.gz \
+            -t VEP \
+           --tempdir . \
+           --skip-gene-tables --skip-cadd --skip-gerp-bp \
+            -p denovo.ped \
+        trio.trim.vep.denovo.db
 
 curl http://home.chpc.utah.edu/~u1138933/gemini_db/trio.trim.vep.denovo.db > trio.trim.vep.denovo.db
-
+```
 
 # slide 19
+```
 gemini de_novo trio.trim.vep.denovo.db
+```
+
 # type Ctrl+C to stop output if you'd like (should take 20 seconds to complete)
 
 # slide 21
