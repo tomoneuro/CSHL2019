@@ -120,6 +120,7 @@ bcftools query -i 'TYPE="snp"' -f'%CHROM\n' platinum-exome.vcf.gz | grep -v "^#"
    7058 9
    3448 X
      99 Y
+
 bcftools query -i 'TYPE="snp"' -f'%CHROM\n' platinum-exome.vcf.gz | grep -v "^#" | sort | uniq -c | awk '{print $2"\t"$1}'
 1	16030
 10	6524
@@ -180,7 +181,8 @@ Now see which ones are loss of function?
 ```gemini query -q "select chrom,start,end,ref,alt,is_coding from variants where is_coding=1 and is_lof=1" trio.trim.vep.denovo.db```
 
 "and" connects filtering criterion
-```gemini query -q "select chrom,start,end,ref,alt,is_coding from variants where is_coding=1" trio.trim.vep.denovo.db | wc -l
+```
+gemini query -q "select chrom,start,end,ref,alt,is_coding from variants where is_coding=1" trio.trim.vep.denovo.db | wc -l
 6229
 gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_coding=1 and is_lof=1" trio.trim.vep.denovo.db | wc -l
 94
@@ -191,9 +193,14 @@ We also need to check the quality, not taking the face value.
 Quality associated with those variants phred scale
 quality score of vcf files QUAL=-10-log(Pfalse) same as Phred score
 Phred score>=30
-```gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=30" trio.trim.vep.denovo.db | wc -l
-141```
+```
+gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=30" trio.trim.vep.denovo.db | wc -l
+141
+```
+
 Phred score>=100
-```gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=100" trio.trim.vep.denovo.db | wc -l
-138```
+```
+gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=100" trio.trim.vep.denovo.db | wc -l
+138
+```
 
