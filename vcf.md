@@ -1,10 +1,10 @@
 1 Finding number of variant = counting line of vcf except header
-zless platinum-exome.vcf.gz | grep -v "^#" | wc -l
+```zless platinum-exome.vcf.gz | grep -v "^#" | wc -l
 177675
-
+```
 
 2 How many (biallelic) SNPs are in the file? (Hint: awk's "length" option or bcftools)
-bcftools filter -i 'TYPE="snp"' platinum-exome.vcf.gz | grep -v "^#" | wc -l
+```bcftools filter -i 'TYPE="snp"' platinum-exome.vcf.gz | grep -v "^#" | wc -l
 160150
 
 bcftools stats platinum-exome.vcf.gz | grep ^SN
@@ -23,9 +23,10 @@ SN	0	number of multiallelic SNP sites:	297
 (my initial answer)
 bcftools view -m2 -M2 -v snps platinum-exome.vcf.gz | wc -l 
 159941
-
+```
 3 How many transitions? (Hint: awk '$4=="C" && $5=="T"')
- zcat platinum-exome.vcf.gz | awk '$4=="C" && $5=="T"' | wc -l
+```
+zcat platinum-exome.vcf.gz | awk '$4=="C" && $5=="T"' | wc -l
 22955
 zcat platinum-exome.vcf.gz | awk '$4=="T" && $5=="C"' | wc -l
  22781
@@ -34,11 +35,12 @@ zcat platinum-exome.vcf.gz | awk '$4=="A" && $5=="G"' | wc -l
 
 zcat platinum-exome.vcf.gz | awk '$4=="G" && $5=="A"' | wc -l
 23336
-
+```
  ... sam up every transitions
  Total 92270
 
 4 How many transversions? (Hint: awk '$4=="A" && $5=="C"')
+```
 zcat platinum-exome.vcf.gz | awk '$4=="A" && $5=="C"' | wc -l
 16130
 zcat platinum-exome.vcf.gz | awk '$4=="C" && $5=="A"' | wc -l
@@ -55,7 +57,7 @@ zcat platinum-exome.vcf.gz | awk '$4=="C" && $5=="G"' | wc -l
 
 zcat platinum-exome.vcf.gz | awk '$4=="G" && $5=="C"' | wc -l
 8086
-
+```
 ... sum up evry transversions
 
 67583
@@ -64,22 +66,24 @@ zcat platinum-exome.vcf.gz | awk '$4=="G" && $5=="C"' | wc -l
 1.36
 
 6. How many high confidence (QUAL >30) variants are there (Hint: bcftools filter)?
+```
 bcftools filter -i 'QUAL>30' platinum-exome.vcf.gz | grep -v "^#" | wc -l
 122046
 
 
-(my answer)
+#(my answer)
 bcftools filter -i'%QUAL>30' platinum-exome.vcf.gz | wc -l
 122134
 
 
 https://samtools.github.io/bcftools/howtos/index.html
-
+```
 7. How many variants are present as a heterozygous genotype in 1 individual? (Hint: the AC attribute in VCF)
+```
 bcftools filter -i 'AC=1' platinum-exome.vcf.gz | grep -v "^#" | wc -l
 40351
 
-(my answer)
+#(my answer)
 zcat platinum-exome.vcf.gz | grep "AC=1" | wc -l
 39306
 
@@ -88,8 +92,9 @@ zcat platinum-exome.vcf.gz | grep "AC=1" | grep -v "^#" | wc -l
 Charlotte Reames 10:22 AM
 zcat platinum-exome.vcf.gz | grep -E  "AC=*1*;AF=" | wc -l
 38926
-
+```
 8. Which chromosome has the most SNPs?
+```
 bcftools query -i 'TYPE="snp"' -f'%CHROM\n' platinum-exome.vcf.gz | grep -v "^#" | sort | uniq -c 
   16030 1
    6524 10
@@ -146,6 +151,7 @@ Y	99
 bcftools query -f '%CHROM\n' platinum-exome.vcf.gz| wc -l
 
 zless platinum-exome.vcf.gz | grep "^#=1" | wc -l
+```
 
 9. Which chromosome has the highest density of SNPs?
 
@@ -160,3 +166,34 @@ Using PEDDY software to determine based on ISB2 number suggestive for portion of
 http://home.chpc.utah.edu/~u1138933/peddy/platinum_run3/CSHL_AdvSeqTech_2019.html
 12. How would you go about finding de novo mutations in the kid?
 Using GEMINI
+
+```
+gemini qery -q "SELECT # FROM fakevariants" - header learnSQL2.db
+
+gemini query -q "select chrom,start,end,ref,alt from variants" trio.trim.vep.denovo.db
+```
+Now see which ones are in coding regions
+```
+gemini query -q "select chrom,start,end,ref,alt,is_coding from variants where is_coding=1" trio.trim.vep.denovo.db
+```
+Now see which ones are loss of function?
+```gemini query -q "select chrom,start,end,ref,alt,is_coding from variants where is_coding=1 and is_lof=1" trio.trim.vep.denovo.db```
+
+"and" connects filtering criterion
+```gemini query -q "select chrom,start,end,ref,alt,is_coding from variants where is_coding=1" trio.trim.vep.denovo.db | wc -l
+6229
+gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_coding=1 and is_lof=1" trio.trim.vep.denovo.db | wc -l
+94
+gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1" trio.trim.vep.denovo.db | wc -l
+146
+```
+We also need to check the quality, not taking the face value.
+Quality associated with those variants phred scale
+quality score of vcf files QUAL=-10-log(Pfalse) same as Phred score
+Phred score>=30
+```gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=30" trio.trim.vep.denovo.db | wc -l
+141```
+Phred score>=100
+```gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=100" trio.trim.vep.denovo.db | wc -l
+138```
+
