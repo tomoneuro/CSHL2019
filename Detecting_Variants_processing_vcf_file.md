@@ -203,4 +203,5 @@ Phred score>=100
 gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=100" trio.trim.vep.denovo.db | wc -l
 138
 ```
+Another consideration is the frequency (alternate allele frequency) of variants and diseases
 
