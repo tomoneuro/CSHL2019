@@ -203,5 +203,16 @@ Phred score>=100
 gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=100" trio.trim.vep.denovo.db | wc -l
 138
 ```
-Another consideration is the frequency (alternate allele frequency) of variants and diseases
+Another consideration is the frequency (alternate allele frequency) of variants and diseases max_aaf_all in all population, ancestry and find maximum value
+```
+gemini query -q "select chrom,start,end,ref,alt,is_coding,impact,gene from variants where is_lof=1 and qual>=100 and max_aaf_all<0.0002941176471" trio.trim.vep.denovo.db
+chr2	21236250	21236251	G	A	1	stop_gained	APOB
+chr2	54001608	54001609	G	T	1	stop_gained	CHAC2
+chr15	57953654	57953655	C	CA	1	frameshift_variant	GCOM1
+chr17	39973373	39973374	C	T	1	stop_gained	FKBP10
+chr22	30218065	30218066	T	C	0	splice_acceptor_variant	ASCC2
+
+```
+Two critical factors - frequency of variants and impact (loss of function). Low frequency is likely pathogenic.
+
 
