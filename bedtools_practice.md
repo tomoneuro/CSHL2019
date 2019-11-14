@@ -91,11 +91,19 @@ cat gwas.bed | wc -l
 ```
 
 7. Create intervals representing the canonical 2bp splice sites on either side of each exon (don’t worry about excluding splice sites at the first or last exon). (Hint - have a look at the flank tool.)
-
-
-
+```
+bedtools flank -i exons.bed -g genome.txt -b 5| head
+```
 8. What is the Jaccard statistic between CpG and hESC enhancers? Compare that to the Jaccard statistic between CpG and hESC promoters. Does the result make sense? (Hint - you will need grep).
+```
+bedtools jaccard -a cpg.bed -b enhancer.bed
+1148180	132977386	0.0086344	4969
 
+bedtools jaccard -a cpg.bed -b promoter.bed
+15661111	53551816	0.292448	20402
+```
 9. What would you expect the Jaccard statistic to look like if promoters were randomly distributed throughout the genome? (Hint - you will need the shuffle tool.)
+
+
 
 10. Which hESC ChromHMM state (e.g., 11_Weak_Txn, 10_Txn_Elongation) represents the most number of base pairs in the genome? (Hint: you will need to use awk or perl here, as well as the groupby tool.)
