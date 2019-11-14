@@ -17,6 +17,7 @@ conda install ggd
 ```
 wget ftp://ftp.ensembl.org/pub/release-98/gtf/homo_sapiens/*
 ```
+
 Getting pfam
 ```
 wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ucscGenePfam.txt.gz
