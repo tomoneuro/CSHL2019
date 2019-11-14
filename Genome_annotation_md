@@ -1,2 +1,3 @@
 Down load reference from UCSC genome browser
-Go to Tool --> Table browser --> select genome tab --> create output
+Go to Tool --> Table browser --> select genome tab, BED browser extensibnle data --> create output
+Using TABIX 
