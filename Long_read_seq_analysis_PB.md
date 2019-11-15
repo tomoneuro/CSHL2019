@@ -14,7 +14,7 @@ mkdir bams
 mkdir vcfs
 ```
 ## Let's process samples: get fastq file, get reference then put into minimap2 to align, then switch 
-minimap2 -t 4 --MD -ax <option a and x (preset for map-pb)> map-pb $reference $kid_fq | samtools view -hSb <another options h+S+b> | samtools sort > bams/chr22_HG002.grch37.bam <output bam file>
+minimap2 -t 4 --MD <we do want information of ___ included> -ax <option a and x (preset for map-pb)> map-pb $reference $kid_fq | samtools view -hSb <another options h+S+b> | samtools sort > bams/chr22_HG002.grch37.bam <output bam file>
 samtools index bams/chr22_HG002.grch37.bam <sort the bam file>
 sniffles --genotype -t 4 -m bams/chr22_HG002.grch37.bam -v vcfs/chr22_HG002_unsort.grch37.vcf <variant calling using sniffles>
   
@@ -59,11 +59,13 @@ grep -v "^#" vcfs/chr22_HG002_unsort.grch37.vcf | head -2
 ```
 
 ## Moving forward to sort+bgzip, index, and merge
+First create environmental variable "genome" and bring in the genome information diced in chrosomes.
+gsort: way of sorting 
 ```
 genome=https://raw.githubusercontent.com/jbelyeu/ggd-recipes/master/genomes/Homo_sapiens/GRCh37/GRCh37.genome
-gsort vcfs/chr22_HG002_unsort.vcf $genome | bgzip -c > vcfs/chr22_HG002.grch37.vcf.gz
-gsort vcfs/chr22_HG003_unsort.vcf $genome | bgzip -c > vcfs/chr22_HG003.grch37.vcf.gz
-gsort vcfs/chr22_HG004_unsort.vcf $genome | bgzip -c > vcfs/chr22_HG004.grch37.vcf.gz
+gsort vcfs/chr22_HG002_unsort.grch37.vcf $genome | bgzip -c > vcfs/chr22_HG002.grch37.vcf.gz
+gsort vcfs/chr22_HG003_unsort.grch37.vcf $genome | bgzip -c > vcfs/chr22_HG003.grch37.vcf.gz
+gsort vcfs/chr22_HG004_unsort.grch37.vcf $genome | bgzip -c > vcfs/chr22_HG004.grch37.vcf.gz
 
 tabix vcfs/chr22_HG002.grch37.vcf.gz
 tabix vcfs/chr22_HG003.grch37.vcf.gz
