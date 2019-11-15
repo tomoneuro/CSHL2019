@@ -103,7 +103,14 @@ bedtools jaccard -a cpg.bed -b promoter.bed
 15661111	53551816	0.292448	20402
 ```
 9. What would you expect the Jaccard statistic to look like if promoters were randomly distributed throughout the genome? (Hint - you will need the shuffle tool.)
+shuf promoter.bed > shuffledpromoter.bed
+sort -k 1,1n shuffledpromoter.bed > shuffledpromoter1.bed
+
+bedtools jaccard -a cpg.bed -b shuffledpromoter1.bed
+
 
 
 
 10. Which hESC ChromHMM state (e.g., 11_Weak_Txn, 10_Txn_Elongation) represents the most number of base pairs in the genome? (Hint: you will need to use awk or perl here, as well as the groupby tool.)
+
+
