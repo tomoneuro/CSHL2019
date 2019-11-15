@@ -1,10 +1,17 @@
 Analyzing transcriptome from the normal, registered tissue
 
+Python3
+Need to get the newest python3
+
 Get the data set from
 https://www.gtexportal.org/home/datasets
 
-  Conts: Gene read counts.
+
+  Counts: Gene read counts.
   Annotation: A de-identified, open access version of the sample annotations available in dbGaP.
+  
+Get the cancer data (if you want to compare) from NIH
+https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/
 ```
 metadata_file = 'PATH_TO_/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'
 matrix_file = 'PATH_TO/GTEx_Analysis_2017-06-05_v8_STARv2.5.3a_junctions.gct'
