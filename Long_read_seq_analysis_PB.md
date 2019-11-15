@@ -72,7 +72,7 @@ tabix vcfs/chr22_HG003.grch37.vcf.gz
 tabix vcfs/chr22_HG004.grch37.vcf.gz
 ```
 
-## Now, let's see the results - visualization example
+## Now, let's see the results - visualization example. Using samplot.
 ```
 samplot plot -c 22 -s 18057764 -e 18060464 -b bams/chr22_HG002.grch37.bam -t DEL -o del_hg002_22_18057764_18060464.png
 ```
