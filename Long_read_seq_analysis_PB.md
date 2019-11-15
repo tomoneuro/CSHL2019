@@ -14,6 +14,10 @@ mkdir bams
 mkdir vcfs
 ```
 ## Let's process samples: get fastq file, get reference then put into minimap2 to align, then switch 
+minimap2 -t 4 --MD -ax <option a and x (preset for map-pb)> map-pb $reference $kid_fq | samtools view -hSb <another options h+S+b> | samtools sort > bams/chr22_HG002.grch37.bam <output bam file>
+samtools index bams/chr22_HG002.grch37.bam <sort the bam file>
+sniffles --genotype -t 4 -m bams/chr22_HG002.grch37.bam -v vcfs/chr22_HG002_unsort.grch37.vcf <variant calling using sniffles>
+  
 1. hg002 
 ```
 kid_fq="$(ggd get-files grch37-hg002-pb-chr22-giab-v1 -p "*fastq.gz")"
