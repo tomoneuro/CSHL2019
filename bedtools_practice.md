@@ -103,11 +103,22 @@ bedtools jaccard -a cpg.bed -b promoter.bed
 15661111	53551816	0.292448	20402
 ```
 9. What would you expect the Jaccard statistic to look like if promoters were randomly distributed throughout the genome? (Hint - you will need the shuffle tool.)
+bedtools shuffle -i <(grep Promoter hesc.chromHmm.bed) -g genome.txt \
+  | sort -k1,1 -k2,2n \
+> promoters.shuffled.bed
+
+bedtools jaccard -a cpg.bed -b promoters.shuffled.bed
+intersection	union	jaccard	n_intersections
+341707	68521738	0.00498684	842
+
+(wrong)
 shuf promoter.bed > shuffledpromoter.bed
 sort -k 1,1n shuffledpromoter.bed > shuffledpromoter1.bed
 
 bedtools jaccard -a cpg.bed -b shuffledpromoter1.bed
 
+bedtools shuffle -chrom -i promoter.bed -g genome.txt > shufpromoter.bed
+bedtools jaccard -a cpg.bed -b shufpromoter.bed
 
 
 
