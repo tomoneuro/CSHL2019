@@ -114,4 +114,4 @@ do
     fi
 done
 ```
-## The codes we created for one sample, if succeeds, can be put in bash to be run automatically, when multiple sapmles were put together.
+## The codes we created for one sample, if succeeds, can be put in bash to be run automatically, when multiple sapmles were put together. Get familiar with looping, conditional criteria, etc.
