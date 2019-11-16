@@ -142,4 +142,16 @@ scrna <- ScaleData(object = scrna, features = rownames(x = scrna), vars.to.regre
 For class project, SeqTech2019_Data, start with following code to open the file.
 ```
 scrna.counts <- Read10X_h5("./Desktop/SeqTech2019_Data/filtered_feature_bc_matrix.h5")
+
+cat test.fa
+>scaff1
+AAAAAAAAAA
+>scaff2
+TTTTTTTTT
+1:08 PM
+samtools faidx test.fa
+1:08 PM
+cat test.fa.fai
+scaff1    10    8    10    11
+scaff2    9    27    9    10
 ```
