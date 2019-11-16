@@ -87,4 +87,31 @@ fi
 ~      
 ```
 
-
+```
+#!/bin/bash
+```
+for bam_file_name in ./*;
+do
+    if [ $bam_file_name == "./chr22_HG002.bam" ]
+    then
+        echo "$bam_file_name"
+        echo -e "a few more things\n"
+    else
+        echo "Nope, can't do it"
+    fi
+done
+```
+For multiple files with name chr22_HG00 in common,
+```
+for bam_file_name in ./chr22_HG00*;
+do
+    if [ $bam_file_name == "./chr22_HG00*.bam" ]
+    then
+        echo "$bam_file_name"
+        echo -e "a few more things\n"
+    else
+        echo "Nope, can't do it"
+    fi
+done
+```
+## The codes we created for one sample, if succeeds, can be put in bash to be run automatically, when multiple sapmles were put together.
