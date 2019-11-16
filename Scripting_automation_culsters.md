@@ -71,9 +71,8 @@ else
 fi
 ~       
 ```
-no
-ubuntu@ip-172-31-4-4:~$ vim iftest
-
+we can now test with imput 1
+```
 #! /bin/bash
 v=1
 
@@ -89,7 +88,7 @@ fi
 
 ```
 #!/bin/bash
-```
+
 for bam_file_name in ./*;
 do
     if [ $bam_file_name == "./chr22_HG002.bam" ]
@@ -114,4 +113,41 @@ do
     fi
 done
 ```
-## The codes we created for one sample, if succeeds, can be put in bash to be run automatically, when multiple sapmles were put together. Get familiar with looping, conditional criteria, etc.
+## The codes we created for one sample, if succeeds, can be put in bash to be run automatically, when multiple sapmles were put together. Get familiar with looping, conditional criteria, etc. Make argument - best practice
+Set up multiple input like this
+```
+
+#! /bin/bash
+number=$1
+
+if [ $1 == 0 ]
+then
+    echo "yes"
+
+else
+    echo "no"
+fi
+
+then
+bash iftest 4
+no
+bash iftest 0
+yes
+```
+For more larger samples
+```
+$bash align_call.sh argument_1 argument_2 argument_3     
+
+#!/bin/bash                                                                                                                                                                                                 
+#Author: Eric Bogenschutz
+
+reference=$1
+$sample=$2
+                                                                                                                                                                 
+
+minimap2 -t 4 --MD -ax map-pb $reference $sample | samtools view -hSb | samtools sort > bams/$sample.grch37.bam
+
+samtools index bams/$sample.grch37.bam
+
+sniffles --genotype -t 4 -m bams/$sample.grch37.bam -v vcfs/$sample_unsort.grch37.vcf
+```
