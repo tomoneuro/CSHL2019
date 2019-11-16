@@ -139,5 +139,7 @@ scrna <- FindVariableFeatures(object = scrna, selection.method = 'vst', mean.cut
 scrna <- ScaleData(object = scrna, features = rownames(x = scrna), vars.to.regress = c("S.Score","G2M.S core"), display.progress=FALSE) # center and regress out unwanted variation
 ```
 
-
+For class project, SeqTech2019_Data, start with following code to open the file.
+```
+scrna.counts <- Read10X_h5("./Desktop/SeqTech2019_Data/filtered_feature_bc_matrix.h5")
 ```
