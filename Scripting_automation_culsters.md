@@ -151,3 +151,5 @@ samtools index bams/$sample.grch37.bam
 
 sniffles --genotype -t 4 -m bams/$sample.grch37.bam -v vcfs/$sample_unsort.grch37.vcf
 ```
+
+# multiple samples to run - large server time, failure can be big loss and big monetary loss. RUN PILOT before running seriously.
