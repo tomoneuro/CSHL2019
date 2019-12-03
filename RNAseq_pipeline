@@ -1,0 +1,16 @@
+1. Data, references
+FASTQ file
+Reference data (.fa)
+Gene annotation data (.gtf)
+Illumina adapter sequence files
+
+2. Software, package
+hisat2 (Indexing)
+FASTQC (Prealignment QC)
+MultiQC (QC report)
+Flexbar (trimming)
+HISAT2 (alignment)
+samtools (postalignment processes)
+stringtie (expression analysis)
+HTSEQ-COUNT ()
+ballgown (differential expression analysis)
