@@ -14,3 +14,4 @@ samtools (postalignment processes)
 stringtie (expression analysis)
 HTSEQ-COUNT ()
 ballgown (differential expression analysis)
+R packages for RNAseq
