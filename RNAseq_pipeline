@@ -5,13 +5,34 @@ Gene annotation data (.gtf)
 Illumina adapter sequence files
 
 2. Software, package
-hisat2 (Indexing)
+*** RNAseq ***
+hisat2 (Indexing, alignment)
 FASTQC (Prealignment QC)
 MultiQC (QC report)
 Flexbar (trimming)
-HISAT2 (alignment)
 samtools (postalignment processes)
 stringtie (expression analysis)
+Gffcompare (manipulating GFF, GTF files)
 HTSEQ-COUNT ()
 ballgown (differential expression analysis)
-R packages for RNAseq
+R
+R packages for RNAseq (bioconductor)
+
+
+*** DNAseq ***
+samtools (manupilating alignment files SAM/BAM/CRAM)
+PICARD
+java 8
+BWA (DNA alignment tool)
+GATK (variant discovery, genotyping)
+VEP (variant annotation tool developed by ensmbl)
+Varscan (call variants in sequencing data)
+BCFools (manipulatinng VCF or BCF)
+
+
+Strelka (for germline and somatic variant caller)
+Sambamba 
+CNVnator (depth based copy number caller)
+CNVkit
+Kallisto
+
